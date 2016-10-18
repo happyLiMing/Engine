@@ -11,9 +11,9 @@
 class Vector2;
 
 //ENUMS//////////////////////////////////////////////////////////////////////////
-enum class XboxButton
+enum class XboxButton : unsigned int
 {
-    DUP,
+    DUP = 0,
     DDOWN,
     DLEFT,
     DRIGHT,
@@ -28,10 +28,10 @@ enum class XboxButton
     START,
     BACK,
     HOME,
-    numXboxButtons
+    NUM_XBOX_BUTTONS
 };
 
-
+//-----------------------------------------------------------------------------------
 class XInputController
 {
 public:
@@ -40,7 +40,7 @@ public:
     XInputController(int controllerNumber);
     
     //FUNCTIONS//////////////////////////////////////////////////////////////////////////
-    void Update(float deltaTime);
+    void Update(float deltaSeconds);
     /*Left motor is the heavy-duty motor, creates large vibrations.
     * Right motor is for finer and more gentle vibrations. */
     void Vibrate(int leftMotorVibration, int rightMotorVibration);

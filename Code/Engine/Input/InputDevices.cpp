@@ -1,8 +1,9 @@
 #include "Engine/Input/InputDevices.hpp"
 #include "Engine/Input/InputSystem.hpp"
-#include "../Math/Vector2.hpp"
+#include "Engine/Math/Vector2.hpp"
 #include "Logging.hpp"
 
+//KEYBOARD INPUT/////////////////////////////////////////////////////////////////////
 //-----------------------------------------------------------------------------------
 void KeyboardInputDevice::SetKeyValue(unsigned char vkeyCode, bool isDown)
 {
@@ -15,6 +16,7 @@ InputValue* KeyboardInputDevice::FindValue(unsigned char vkeyCode)
     return &(m_keys[vkeyCode]);
 }
 
+//MOUSE INPUT/////////////////////////////////////////////////////////////////////
 //-----------------------------------------------------------------------------------
 void MouseInputDevice::SetButtonValue(unsigned char mouseButton, bool isDown)
 {
@@ -31,4 +33,10 @@ InputValue* MouseInputDevice::FindButtonValue(unsigned char mouseButton)
 void MouseInputDevice::SetDelta(const Vector2Int& cursorDelta)
 {
     m_deltaPosition.SetValue(Vector2(cursorDelta.x, -cursorDelta.y).GetNorm());
+}
+
+//-----------------------------------------------------------------------------------
+void XInputControllerInputDevice::Update(float deltaSeconds)
+{
+
 }

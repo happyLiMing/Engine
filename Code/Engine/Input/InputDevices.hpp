@@ -2,6 +2,7 @@
 #include "Engine/Input/InputValues.hpp"
 #include "Engine/Math/Vector2Int.hpp"
 #include "Engine/Input/InputSystem.hpp"
+#include "Engine/Input/XInputController.hpp"
 
 // Input Devices manage our raw inputs - our lowest level - tracks all hardware inputs
 // (Axises, Values, what have you)
@@ -49,4 +50,21 @@ public:
     //MEMBER VARIABLES/////////////////////////////////////////////////////////////////////
     InputValue m_buttons[InputSystem::NUM_MOUSE_BUTTONS];
     InputVector2 m_deltaPosition;
+};
+
+//-----------------------------------------------------------------------------------
+class XInputControllerInputDevice : InputDevice
+{
+public:
+    XInputControllerInputDevice(unsigned int index) : m_controller(index) {};
+    ~XInputControllerInputDevice() {};
+
+    virtual void Update(float deltaSeconds) override;
+    InputValue* FindButtonValue(XboxButton button);
+
+    //MEMBER VARIABLES/////////////////////////////////////////////////////////////////////
+    XInputController m_controller;
+    InputValue m_buttons[(unsigned int) XboxButton::NUM_XBOX_BUTTONS];
+    InputVector2 m_leftStick;
+    InputVector2 m_rightStick;
 };

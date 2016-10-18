@@ -26,7 +26,7 @@ InputSystem::InputSystem(void* hWnd, int maximumNumberOfControllers /*= 0*/)
     //Only initialize the number of controllers we need for the game.
     for (int i = 0; i < m_maximumNumControllers; i++)
     {
-        m_controllers[i] = new XInputController(i);
+        m_controllerDevices[i] = new XInputControllerInputDevice(i);
     }
 
     //Initialize all keys to up
@@ -54,19 +54,13 @@ InputSystem::~InputSystem()
 
     for (int i = 0; i < m_maximumNumControllers; i++)
     {
-        delete m_controllers[i];
+        delete m_controllerDevices[i];
     }
 }
 
 //-----------------------------------------------------------------------------------
 void InputSystem::Update(float deltaSeconds)
 {
-    //Controller Updates
-    for (int i = 0; i < m_maximumNumControllers; i++)
-    {
-        m_controllers[i]->Update(deltaSeconds);
-    }
-
     //Mouse Updates
     HWND hWnd = static_cast<HWND>(m_hWnd);
     m_hasFocus = hWnd == GetFocus();
