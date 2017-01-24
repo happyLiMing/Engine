@@ -9,12 +9,12 @@
 #include "Engine/Renderer/2D/ResourceDatabase.hpp"
 
 //-----------------------------------------------------------------------------------
-Particle::Particle(const Vector2& spawnPosition, const ParticleEmitterDefinition* definition, float initialRotationDegrees, const Vector2& initialVelocity, const Vector2& initialAcceleration)
-    : m_position(spawnPosition)
-    , m_velocity(initialVelocity)
+Particle::Particle(const Vector2& spawnPosition, const ParticleEmitterDefinition* definition, float rotationDegrees /*= 0.0f*/, const Vector2& initalVelocity /*= Vector2::ZERO*/, const Vector2& initialAcceleration /*= Vector2::ZERO*/, const RGBA& color /*= RGBA::WHITE*/) : m_position(spawnPosition)
+    , m_velocity(initalVelocity)
     , m_acceleration(initialAcceleration)
-    , m_rotationDegrees(initialRotationDegrees)
+    , m_rotationDegrees(rotationDegrees)
     , m_age(0.0f)
+    , m_color(color)
 {
     m_scale = definition->m_properties.Get<Range<Vector2>>(PROPERTY_INITIAL_SCALE).GetRandom();
     m_maxAge = definition->m_properties.Get<Range<float>>(PROPERTY_PARTICLE_LIFETIME).GetRandom();
@@ -168,8 +168,9 @@ void ParticleEmitter::SpawnParticle()
     
     spawnPosition += randomVectorOffset;
 
-    m_particles.emplace_back(spawnPosition, m_definition, initialRotation, initialVelocity);
-    m_particles.back().m_color = m_definition->m_properties.Get<RGBA>(PROPERTY_INITIAL_COLOR);
+    RGBA color = m_parentSystem->m_colorOverride == RGBA::WHITE ? m_definition->m_properties.Get<RGBA>(PROPERTY_INITIAL_COLOR) : m_parentSystem->m_colorOverride;
+
+    m_particles.emplace_back(spawnPosition, m_definition, initialRotation, initialVelocity, Vector2::ZERO, color);
 }
 
 //-----------------------------------------------------------------------------------
@@ -410,4 +411,49 @@ void ParticleEmitter::BuildRibbonParticles(BufferedMeshRenderer& renderer)
     }
 
     renderer.m_builder.CopyToMesh(&renderer.m_mesh, &Vertex_Sprite::Copy, sizeof(Vertex_Sprite), &Vertex_Sprite::BindMeshToVAO);
+}
+
+//-----------------------------------------------------------------------------------
+TextParticleSystem::TextParticleSystem(const std::string& systemName, int orderingLayer, const Transform2D& startingTransform, Transform2D* parentTransform /*= nullptr*/, const SpriteResource* spriteOverride /*= nullptr*/)
+    : ParticleSystem(systemName, orderingLayer, startingTransform, parentTransform, spriteOverride)
+{
+    for (unsigned int i = 0; i < m_emitters.size(); ++i)
+    {
+
+    }
+}
+
+//-----------------------------------------------------------------------------------
+void TextParticleSystem::Update(float deltaSeconds)
+{
+    ParticleSystem::Update(deltaSeconds);
+}
+
+//-----------------------------------------------------------------------------------
+void TextParticleSystem::Render(BufferedMeshRenderer& renderer)
+{
+    for (ParticleEmitter* emitter : m_emitters)
+    {
+        TextParticleEmitter* textEmitter = dynamic_cast<TextParticleEmitter*>(emitter);
+        ASSERT_OR_DIE(textEmitter, "Added a non-text emitter to a text particle system");
+
+        if (textEmitter->m_particles.size() > 0)
+        {
+            Texture* diffuse = textEmitter->m_spriteOverride ? textEmitter->m_spriteOverride->m_texture : textEmitter->m_definition->m_spriteResource->m_texture;
+            textEmitter->m_definition->m_material->SetDiffuseTexture(diffuse);
+            renderer.SetMaterial(textEmitter->m_definition->m_material);
+
+            renderer.SetModelMatrix(Matrix4x4::IDENTITY);
+
+            textEmitter->BuildTextParticles(renderer);
+#pragma todo("Remove this flush once we're ready to")
+            renderer.FlushAndRender();
+        }
+    }
+}
+
+//-----------------------------------------------------------------------------------
+void TextParticleSystem::CreateTextParticle(const char* textToMakeParticleFor)
+{
+
 }

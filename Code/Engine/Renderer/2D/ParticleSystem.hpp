@@ -15,7 +15,12 @@ class ParticleSystem;
 //-----------------------------------------------------------------------------------
 struct Particle
 {
-    Particle(const Vector2& spawnPosition, const ParticleEmitterDefinition* definition, float rotationDegrees = 0.0f, const Vector2& initalVelocity = Vector2::ZERO, const Vector2& initialAcceleration = Vector2::ZERO);
+    Particle(const Vector2& spawnPosition, 
+        const ParticleEmitterDefinition* definition, 
+        float rotationDegrees = 0.0f, 
+        const Vector2& initalVelocity = Vector2::ZERO, 
+        const Vector2& initialAcceleration = Vector2::ZERO, 
+        const RGBA& color = RGBA::WHITE);
 
     inline bool IsDead() { return m_age > m_maxAge; };
 
@@ -78,11 +83,15 @@ public:
     static void Destroy(ParticleSystem* systemToDestroy);
     static void PlayOneShotParticleEffect(const std::string& systemName, unsigned int const layerName, const Transform2D& startingTransform, Transform2D* parentTransform = nullptr, const SpriteResource* spriteOverride = nullptr);
     void Flush();
+
     //MEMBER VARIABLES/////////////////////////////////////////////////////////////////////
     std::vector<ParticleEmitter*> m_emitters;
     const ParticleSystemDefinition* m_definition;
     bool m_isPaused = false;
+    RGBA m_colorOverride = RGBA::WHITE;
 };
+
+//RIBBON PARTICLES/////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------------
 class RibbonParticleSystem : public ParticleSystem
@@ -107,4 +116,46 @@ struct RibbonParticlePiece
 
     Particle m_particle;
     Vector2 m_perpendicularNormal = Vector2::ZERO;
+};
+
+//TEXT PARTICLES/////////////////////////////////////////////////////////////////////
+
+//-----------------------------------------------------------------------------------
+class TextParticleSystem : public ParticleSystem
+{
+public:
+    TextParticleSystem(const std::string& systemName, int orderingLayer, const Transform2D& startingTransform, Transform2D* parentTransform = nullptr, const SpriteResource* spriteOverride = nullptr);
+    virtual ~TextParticleSystem() {};
+
+    //FUNCTIONS/////////////////////////////////////////////////////////////////////
+    virtual void Update(float deltaSeconds) override;
+    virtual void Render(BufferedMeshRenderer& renderer) override;
+    void CreateTextParticle(const char* textToMakeParticleFor);
+};
+
+//-----------------------------------------------------------------------------------
+struct TextParticle : public Particle
+{
+    TextParticle(const Vector2& spawnPosition,
+        const ParticleEmitterDefinition* definition,
+        float rotationDegrees = 0.0f,
+        const Vector2& initalVelocity = Vector2::ZERO,
+        const Vector2& initialAcceleration = Vector2::ZERO,
+        const RGBA& color = RGBA::WHITE)
+        : Particle(spawnPosition, definition, rotationDegrees, initalVelocity, initialAcceleration, color)
+    {}
+
+    const char* m_text;
+};
+
+//-----------------------------------------------------------------------------------
+class TextParticleEmitter : public ParticleEmitter
+{
+public:
+    TextParticleEmitter(ParticleSystem* parent, const ParticleEmitterDefinition* definition, const Transform2D& startingTransform, Transform2D* parentTransform = nullptr)
+        : ParticleEmitter(parent, definition, startingTransform, parentTransform)
+    {};
+    virtual ~TextParticleEmitter() {};
+
+    void BuildTextParticles(BufferedMeshRenderer& renderer);
 };
